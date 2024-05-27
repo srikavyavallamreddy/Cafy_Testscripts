@@ -126,4 +126,35 @@ def test_duplicate_traffic_item():
     print("stop time:", end)
     print("time duration for API execution", end - start)
 
-    
+def test_get_active_streams():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    traffic_items=tgnObj.get_active_streams()
+    print(traffic_items)
+    end = datetime.datetime.now()
+    print("stop time:", end)
+    print("time duration for API execution", end - start)
+
+def test_start_traffic():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    tgnObj.start_traffic()
+    end = datetime.datetime.now()
+    print("stop time:", end)
+    print("time duration for API execution", end - start)
+
+def test_stop_traffic():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    tgnObj.stop_traffic()
+    end = datetime.datetime.now()
+    print("stop time:", end)
+    print("time duration for API execution", end - start)
+
+def test_clear_traffic_stats():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    tgnObj.clear_traffic_stats()
+    end = datetime.datetime.now()
+    print("stop time:", end)
+    print("time duration for API execution", end - start)
