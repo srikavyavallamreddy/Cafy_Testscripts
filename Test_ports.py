@@ -192,4 +192,21 @@ def test_get_card_type():
     print("stop time:", end)
     print("time duration for API execution", end - start)
 
+def test_add_device():
+    start = datetime.datetime.now()
+    print("start time :",start)
+    device = tgnObj.add_device(port_list= ["10.39.65.156/2/15"])
+    print(device)
+    end = datetime.datetime.now()
+    print("end time :",end)
+    print("Time duration for API execution",end - start)
+
+def test_add_device_bgp():
+    start =  datetime.datetime.now()
+    print("start time :",start)
+    device = tgnObj.add_device(port_list= ["10.39.65.156/2/15"],ipv4_address_start = "10.9.0.1",bgp_v4_active = True)
+    end = datetime.datetime.now()
+    print("stop time :",end)
+    print("Time duration for API execution ",end - start)
+    
     
