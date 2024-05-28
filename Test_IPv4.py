@@ -69,3 +69,45 @@ def test_create_ipv4_interface():
     end = datetime.datetime.now()
     print("stop time:", end)
     print("time duration for API execution", end - start)
+
+def test_change_ipv4_ipv6_src_address_ipv4():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    src_address = tgnObj.change_ipv4_ipv6_src_address(traffic_item_list=["Traffic Item 1"],
+                                    cfg_dict={'fieldValue': "3.3.53.4", 'startValue': "3.3.53.4",
+                                              'valueType': "decrement", 'countValue': 1000})
+    print(src_address)
+    end = datetime.datetime.now()
+    print("stop time:", end)
+    print("time duration for API execution", end - start)
+
+def test_change_ipv4_ipv6_src_address_ipv6():
+    start = datetime.datetime.now()
+    print("start time: ",start)
+    tgnObj.change_ipv4_ipv6_src_address(traffic_item_list=["Traffic Item 3"],
+                                    cfg_dict={'fieldValue': "3::2:1", 'startValue': "3::2:1",
+                                              'valueType': "decrement", 'countValue': 1000})
+    end = datetime.datetime.now()
+    print("end time:",end)
+    print("time duration fir API execution ",end - start)
+
+   
+def test_change_ipv4_ipv6_dst_address_ipv4():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    tgnObj.change_ipv4_ipv6_dst_address(traffic_item_list=["Traffic Item 2"],
+                                    cfg_dict={'fieldValue': "5.5.53.4", 'startValue': "5.5.53.4",
+                                              'valueType': "increment", 'countValue': 10})
+    end = datetime.datetime.now()
+    print("stop time:", end)
+    print("time duration for API execution", end - start)
+
+def test_change_ipv4_ipv6_dst_address_ipv6():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    tgnObj.change_ipv4_ipv6_dst_address(traffic_item_list=["Traffic Item 3"],
+                                    cfg_dict={'fieldValue': "100::2:1", 'startValue': "100::2:1",
+                                              'valueType': "decrement", 'countValue': 100})
+    end = datetime.datetime.now()
+    print("stop time:", end)
+    print("time duration for API execution", end - start)
