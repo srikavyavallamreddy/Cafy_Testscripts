@@ -158,3 +158,41 @@ def test_clear_traffic_stats():
     end = datetime.datetime.now()
     print("stop time:", end)
     print("time duration for API execution", end - start)
+
+def test_regenerate_traffic():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    tgnObj.regenerate_traffic()
+    end = datetime.datetime.now()
+    print("stop time:", end)
+    print("time duration for API execution", end - start)
+
+def test_get_traffic_transmission_mode():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    transmission_mode=tgnObj.get_traffic_transmission_mode(traffic_item_list=['Traffic Item 1','Traffic Item 2'])
+    print(transmission_mode)
+    end = datetime.datetime.now()
+    print("stop time:", end)
+    print("time duration for API execution", end - start)
+
+def test_enable_network_group():
+    start = datetime.datetime.now()
+    print("start_time:", start)
+    enable_network_group = tgnObj.enable_network_group(network_group_list=['Network Group 1'],enable = True)
+    print(enable_network_group)
+    disable_network_group = tgnObj.enable_network_group(network_group_list=['Network Group 1'],enable = False)
+    print(disable_network_group)
+    end = datetime.datetime.now()
+    print("stop time: ",end)
+    print("time duration for API execution: ",end - start)
+
+def test_modify_network_group_address_count():
+    start = datetime.datetime.now()
+    print("start time :",start)
+    network_group_count = tgnObj.modify_network_group_address_count(network_group='Network Group 1', ip_type='ipv4', address_count=3)
+    print(network_group_count)
+    end = datetime.datetime.now()
+    print("stop tiem: ",end)
+    print("tiem duration for API execution",end - start)
+
