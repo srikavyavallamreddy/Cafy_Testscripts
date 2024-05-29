@@ -208,5 +208,15 @@ def test_add_device_bgp():
     end = datetime.datetime.now()
     print("stop time :",end)
     print("Time duration for API execution ",end - start)
+
+def test_get_license_details():
+    start = datetime.datetime.now()
+    print("start time :",start)
+    license_details = tgnObj.get_license_details()
+    print(license_details)
+    end = datetime.datetime.now()
+    print("stop time :",end)
+    print("Time duration for API execution ")
     
+
     

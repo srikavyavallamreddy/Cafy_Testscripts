@@ -196,3 +196,20 @@ def test_modify_network_group_address_count():
     print("stop tiem: ",end)
     print("tiem duration for API execution",end - start)
 
+def test_change_traffic_flow_tracking():
+    start = datetime.datetime.now()
+    print("start time :",start)
+    trafic_item = tgnObj.change_traffic_flow_tracking(cfg_dict = {'trackBy':['ipv4SourceIp0','sourcePort0']},traffic_item_list =['Traffic Item 1'])
+    print(trafic_item)
+    end = datetime.datetime.now()
+    print("stop time :",end)
+    print("Time duration for API execution ",end - start)
+
+def test_change_traffic_flow_tracking_2():
+    start = datetime.datetime.now()
+    print("start time :",start)
+    trafic_item = tgnObj.change_traffic_flow_tracking(cfg_dict = {'trackBy':['sourcePort0','customOverride']},traffic_item_list =['Traffic Item 1','Traffic Item 3'])
+    print(trafic_item)
+    end = datetime.datetime.now()
+    print("stop time :",end)
+    print("Time duration for API execution ",end - start)
