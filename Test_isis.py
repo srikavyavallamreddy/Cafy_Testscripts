@@ -50,3 +50,13 @@ def test_get_isis_route_count():
     end = datetime.datetime.now()
     print("end: ",end)
     print("Time duration for API execution ", end - start)
+
+def test_set_isis_sr_mpls():
+    start = datetime.datetime.now()
+    print("start timen :",start)
+    sr_mpls = tgnObj.set_isis_sr_mpls(device_list=["IPv4 Device Group 2"])
+    print(sr_mpls)
+    end = datetime.datetime.now()
+    print("stop time ",end)
+    print("Time duration for API execution ",end - start)
+    

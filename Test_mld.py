@@ -68,3 +68,4 @@ def test_set_igmp_mld_rate():
     end = datetime.datetime.now()
     print("stop time :",end)
     print("Time duration for API execution",end - start)
+    #check rate under IGMP host
