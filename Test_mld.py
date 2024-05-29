@@ -59,3 +59,12 @@ def test_change_mld_source_list():
     end = datetime.datetime.now()
     print("stop time:", end)
     print("time duration for API execution", end - start)
+
+def test_set_igmp_mld_rate():
+    start = datetime.datetime.now()
+    print("start time :",start)
+    igmp_rate = tgnObj.set_igmp_mld_rate(device_type='mld', rate=4000)
+    print(igmp_rate)
+    end = datetime.datetime.now()
+    print("stop time :",end)
+    print("Time duration for API execution",end - start)
