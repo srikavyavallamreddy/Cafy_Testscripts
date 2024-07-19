@@ -27,7 +27,7 @@ def test_set_isis_route_count_all():
 def test_set_isis_route_count_1():
     start = datetime.datetime.now()
     print("start_time:", start)
-    isis_route_count = tgnObj.set_isis_route_count(route_count=20,network_group="Network Group 1",prefix_step=2,ip_type='ipv6')
+    isis_route_count = tgnObj.set_isis_route_count(route_count=20,network_group="Network Group 1",prefix_step=2,ip_type='ipv4')
     print(isis_route_count)
     end = datetime.datetime.now()
     print("stop time:", end)
