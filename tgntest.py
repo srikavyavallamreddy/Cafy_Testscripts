@@ -197,3 +197,142 @@ class TestTGN():
         Helper.sleep(80, msg='waiting for all protocols start')
 
     
+    @pytest.mark.parametrize("mode", modes)
+    def test_start_traffic(self, mode):
+        """
+        Unit test for start_traffic()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        Helper.sleep(10, msg='waiting 10 seconds before start traffic')
+        Helper.sleep(10, msg='waiting 10 seconds before start traffic')
+        tgn_object.regenerate_traffic()
+        Helper.sleep(5, msg='waiting 5 seconds after traffic regenerated')
+        tgn_object.start_traffic(timer_ticks=40)
+
+    
+    @pytest.mark.parametrize("mode", modes)
+    def test_stop_traffic(self, mode):
+        """
+        Unit test for stop_traffic()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        Helper.sleep(60, msg='waiting for stop traffic')
+        tgn_object.stop_traffic(timer_ticks=40)
+        timeout_ticks = 3
+        state = tgn_object.check_traffic_state(expected='stopped', timer_ticks=timeout_ticks)
+        if state:
+            log.info('Traffic has stopped')
+        else:
+            log.info('Traffic has not stopped yet')
+
+    @pytest.mark.parametrize("mode", modes)
+    def test_verify_traffic(self, mode):
+        """
+        verify all traffic
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        tgn_object.regenerate_traffic()
+        Helper.sleep(5, msg='waiting 5 seconds after traffic regenerated')
+        tgn_object.start_traffic(timer_ticks=40)
+        Helper.sleep(30, msg='waiting for verify traffic')
+        item_stats, flow_stats = tgn_object.verify_traffic(tolerance=3.5)
+        log.info('Item stats: %s' %item_stats)
+        log.info('Flow stats: %s' %flow_stats)
+
+    
+    @pytest.mark.parametrize("mode", modes)
+    def test_verify_traffic_optimization_fix(self, mode):
+        """
+        verify all traffic
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        Helper.sleep(30, msg='waiting for verify traffic')
+        item_stats, flow_stats = tgn_object.verify_traffic()
+        log.info(f"Item stats: {item_stats}")
+        log.info(f"Flow stats: {flow_stats}")
+
+    @pytest.mark.parametrize("mode", modes)
+    def test_verify_traffic_mc_rx_port(self, mode):
+        """
+        verify traffic mc rx port
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        if mode == 'IXIA':
+            ports = {'all_ports': True,
+                     'Ingress': {'tolerance': 5500},
+                     'Egress1': {'tolerance': 90000}}
+        elif mode == 'Spirent':
+            ports = {'all_ports': True,
+                     'AR-TenGigE0/0/0/18-Port 5/7': {'tolerance': 200000},
+                     'DR-FortyGigE0/6/0/16-Port 9/17': {'tolerance': 500}}
+
+        Helper.sleep(30, msg='waiting for verify traffic')
+        headers = ['Traffic Item', 'Tx Port', 'Rx Port', 'IP :Source Address',
+                   'IP :Destination Address', 'Tx Frames', 'Rx Frames',
+                   'Frames Delta', 'Loss %', 'Expected', 'Tolerance', 'Status']
+        item_stats, flow_stats = tgn_object.verify_traffic(mode='rx_port',
+                                                           debug=None,
+                                                           tolerance=100000,
+                                                           tolerance_mode='frame',
+                                                           ports=ports)
+        log.info('Item stats: %s' %item_stats)
+        log.info('Flow stats: %s' %flow_stats)
+
+    @pytest.mark.parametrize("mode", modes)
+    def test_verify_traffic_mc_tx_port(self, mode):
+        """
+        verify traffic mc tx port
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        if mode == 'IXIA':
+            ports = {'all_ports': False, 'Ingress': {}}
+            traffic_items = {'all_traffic_items': False, 'Traffic Item 1': {}}
+        elif mode == 'Spirent':
+            ports = {'all_ports': False, 'DR-FortyGigE0/6/0/16-Port 9/17': {}}
+            traffic_items = {'all_traffic_items': False, 'DR-to-AR-BGP1':{}}
+
+        Helper.sleep(30, msg='waiting for verify traffic')
+        headers = ['Traffic Item', 'Tx Port', 'Rx Port', 'IP :Source Address',
+                   'IP :Destination Address', 'Tx Frames', 'Rx Frames',
+                   'Frames Delta', 'Loss %', 'Expected', 'Tolerance', 'Status']
+        item_stats, flow_stats = tgn_object.verify_traffic(tolerance=3.2,
+                                                           mode='tx_port',
+                                                           ports=ports,
+                                                           traffic_items=traffic_items,
+                                                           headers=headers,
+                                                           flow_per_stream=10)
+        log.info('Item stats: %s' %item_stats)
+        log.info('Flow stats: %s' %flow_stats)
+
+    
+    @pytest.mark.verify
+    @pytest.mark.parametrize("mode", modes)
+    def test_disable_traffic_item(self, mode):
+        """
+        Unit test for disable_traffic_item()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        if mode == 'IXIA':
+            traffic_item = Traffic_Item[0]
+        elif mode == 'Spirent':
+            traffic_item = 'DR-to-AR-BGP1'
+        disable_traffic = tgn_object.disable_traffic_item([traffic_item])
+        if not disable_traffic:
+            pytest.fail(" Traffic Item/Items Not Disabled Successfully")
+
+    @pytest.mark.verify
+    @pytest.mark.parametrize("mode", modes)
+    def test_enable_traffic_item(self, mode):
+        """
+        Unit test for enable_traffic_item()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        if mode == 'IXIA':
+            traffic_item = Traffic_Item[0]
+        elif mode == 'Spirent':
+            traffic_item = 'DR-to-AR-BGP1'
+        enable_traffic = tgn_object.enable_traffic_item([traffic_item])
+        Helper.sleep(10, msg='waiting 10 seconds after traffic enabled')
+        print(enable_traffic)
+        if not enable_traffic:
+            pytest.fail(" Traffic Item/Items Not Enabled Successfully")
