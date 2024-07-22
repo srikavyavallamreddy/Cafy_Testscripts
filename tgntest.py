@@ -87,6 +87,7 @@ class TestTGN():
     #                                    debug_print=True, reserve_ports=True)
     #     log.info('Configuration loaded successfully')
 
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_get_interfaces(self, mode):
         """
@@ -96,6 +97,7 @@ class TestTGN():
         interfaces = tgn_object.get_interfaces()
         log.info('Interfaces are %s' %interfaces)
 
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_get_interfaces_by_name(self, mode):
         """
@@ -105,6 +107,7 @@ class TestTGN():
         interfaces_names = tgn_object.get_interfaces_by_name()
         log.info('Names of interfaces are %s' %interfaces_names)
     
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_start_all_protocols(self, mode):
         """
@@ -114,6 +117,7 @@ class TestTGN():
         tgn_object.start_all_protocols()
         Helper.sleep(80, msg='waiting for all protocols start')
 
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_get_link_status(self, mode):
         """
@@ -141,6 +145,8 @@ class TestTGN():
         for stream in active_streams:
             assert stream in Traffic_Item, f"Stream '{stream}' not found in Traffic_Item list"
 
+
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_get_streamblock_preview(self, mode):
         """
@@ -152,6 +158,7 @@ class TestTGN():
             tgn_object = ApData.tgn_objects[mode]
             tgn_object.get_streamblock_preview()
 
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_modify_ignore_link_status(self, mode):
         """
@@ -161,6 +168,7 @@ class TestTGN():
         tgn_object.modify_ignore_link_status(status="disable")
         tgn_object.modify_ignore_link_status(status="enable")
     
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_modify_streamblock_params(self, mode):
         """
@@ -173,6 +181,7 @@ class TestTGN():
             payload_var={"payload_fill_constant":50, "payload_fill_type":"DECR"}
             tgn_object.modify_streamblock_params(traffic_item_list=['Traffic-1', 'Traffic-2'], cfg_dict=payload_var)
     
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_set_port_transmit_deviation(self, mode):
         """
@@ -184,7 +193,7 @@ class TestTGN():
         tgn_object.start_all_protocols()
         Helper.sleep(80, msg='waiting for all protocols start')
     
-
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_set_port_transmit_deviation_with_incr(self, mode):
         """
@@ -196,7 +205,7 @@ class TestTGN():
         tgn_object.start_all_protocols()
         Helper.sleep(80, msg='waiting for all protocols start')
 
-    
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_start_traffic(self, mode):
         """
@@ -209,7 +218,7 @@ class TestTGN():
         Helper.sleep(5, msg='waiting 5 seconds after traffic regenerated')
         tgn_object.start_traffic(timer_ticks=40)
 
-    
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_stop_traffic(self, mode):
         """
@@ -225,6 +234,7 @@ class TestTGN():
         else:
             log.info('Traffic has not stopped yet')
 
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_verify_traffic(self, mode):
         """
@@ -239,7 +249,7 @@ class TestTGN():
         log.info('Item stats: %s' %item_stats)
         log.info('Flow stats: %s' %flow_stats)
 
-    
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_verify_traffic_optimization_fix(self, mode):
         """
@@ -251,6 +261,7 @@ class TestTGN():
         log.info(f"Item stats: {item_stats}")
         log.info(f"Flow stats: {flow_stats}")
 
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_verify_traffic_mc_rx_port(self, mode):
         """
@@ -278,6 +289,7 @@ class TestTGN():
         log.info('Item stats: %s' %item_stats)
         log.info('Flow stats: %s' %flow_stats)
 
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_verify_traffic_mc_tx_port(self, mode):
         """
@@ -305,7 +317,7 @@ class TestTGN():
         log.info('Flow stats: %s' %flow_stats)
 
     
-    @pytest.mark.verify
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_disable_traffic_item(self, mode):
         """
@@ -320,7 +332,7 @@ class TestTGN():
         if not disable_traffic:
             pytest.fail(" Traffic Item/Items Not Disabled Successfully")
 
-    @pytest.mark.verify
+    @pytest.mark.first_level
     @pytest.mark.parametrize("mode", modes)
     def test_enable_traffic_item(self, mode):
         """
@@ -399,3 +411,104 @@ class TestTGN():
             tgn_object.start_traffic(timer_ticks=240)
             Helper.sleep(30, msg='waiting for stop traffic')
             tgn_object.stop_traffic(timer_ticks=240)
+        
+    @pytest.mark.second_run
+    @pytest.mark.parametrize("mode", modes)
+    def test_change_traffic_flow_tracking(self, mode):
+        """
+        Unit test for change_traffic_flow_tracking
+        """
+        if mode == "Spirent":
+            pytest.skip("Not yet implemented for Spirent")
+        tgn_object = ApData.tgn_objects[mode]
+        traffic_items = Traffic_Item[2]
+        dst_port_track = {'trackBy':['sourceDestPortPair0']}
+        dis_port_track = {'trackBy':[]}
+        #disable tracking for all traffic item
+        tgn_object.change_traffic_flow_tracking(dis_port_track)
+        Helper.sleep(10, msg='waiting 10 second after tracking disabled')
+        #enable tracking
+        tgn_object.change_traffic_flow_tracking(dst_port_track, traffic_items)
+        Helper.sleep(10, msg='waiting 10 second after dst port track enabled for %s' %traffic_items)
+
+    @pytest.mark.second_run
+    @pytest.mark.parametrize("mode", modes)
+    def test_change_traffic_mac_address(self, mode):
+        """
+        Unit test for change_traffic_mac()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+
+        if mode == 'IXIA':
+            traffic_item = Traffic_Item[3]
+        elif mode == 'Spirent':
+            traffic_item = 'RAW-STREAM-2'
+
+        eps_name = 'EndpointSet-2'
+        mac_src_address = '00:14:01:00:00:01'
+        mac_dst_address = '28:c7:ce:ba:01:00'
+        mac_dst_step = '00:00:00:00:00:01'
+        mac_src_count = 1
+        mac_src_mask = '00:00:00:FF:FF:FF'
+        mac_src_mode = 'fixed'
+        mac_dst_mode = 'increment'
+        tgn_object.change_traffic_mac(traffic_item_name=traffic_item,
+                                      endpoint_name = eps_name,
+                                      mac_src_mode = mac_src_mode,)
+
+        tgn_object.change_traffic_mac(traffic_item_name=traffic_item,
+                                      endpoint_name=eps_name,
+                                      mac_src_mode=mac_src_mode,
+                                      mac_src=mac_src_address,
+                                      mac_dst_mode=mac_dst_mode,
+                                      mac_dst=mac_dst_address,
+                                      mac_dst_step=mac_dst_step,
+                                      mac_dst_count=mac_src_count)
+        Helper.sleep(2, msg='waiting 2 second after fixed, increment MAC changed')
+
+        mac_src_mode = 'list'
+        mac_src_address = ['00:14:01:00:00:01']
+        tgn_object.change_traffic_mac(traffic_item_name=traffic_item,
+                                      endpoint_name=eps_name,
+                                      mac_src_mode=mac_src_mode,
+                                      mac_src=mac_src_address, )
+        Helper.sleep(2, msg='waiting 2 second after list MAC changed')
+
+        mac_src_mode = 'random'
+        mac_src_address = '00:14:01:00:00:00'
+        tgn_object.change_traffic_mac(traffic_item_name=traffic_item,
+                                      endpoint_name=eps_name,
+                                      mac_src_mode=mac_src_mode,
+                                      mac_src=mac_src_address,
+                                      mac_src_mask=mac_src_mask)
+        Helper.sleep(2, msg='waiting 2 second after random MAC changed')
+
+        mac_dst_mode = 'discovery'
+        if mode == 'IXIA':
+            tgn_object.change_traffic_mac(traffic_item_name=traffic_item,
+                                          endpoint_name=eps_name,
+                                          mac_dst_mode=mac_dst_mode)
+            Helper.sleep(2, msg='waiting 2 second after auto MAC changed')
+        elif mode == 'Spirent':
+            log.warning('Discovery mode for change_traffic_mac API has not been implemented yet')
+        
+
+    @pytest.mark.second_run
+    @pytest.mark.parametrize("mode", modes)
+    def test_change_ipv4_tos(self, mode):
+        """
+        Unit test for change_ipv4_tos
+        """
+        if mode == 'IXIA':
+            traffic_items = ['Traffic Item 2']
+        elif mode == 'Spirent':
+            traffic_items = ['AR-to-DR-BGP1']
+
+        tos_single = {'valueType': 'singleValue','singleValue': '0'}
+        tos_list = {'valueType': 'valueList', 'valueList': ['0', '1', '3']}
+
+        tgn_object = ApData.tgn_objects[mode]
+        tgn_object.get_ipv4_tos_information()
+        for data in [tos_list, tos_single]:
+            tgn_object.change_ipv4_tos(data, traffic_items)
+            Helper.sleep(20, msg='waiting 10 seconds for %s' % traffic_items)
