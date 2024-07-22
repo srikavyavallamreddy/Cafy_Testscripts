@@ -336,3 +336,66 @@ class TestTGN():
         print(enable_traffic)
         if not enable_traffic:
             pytest.fail(" Traffic Item/Items Not Enabled Successfully")
+        
+
+    @pytest.mark.second_run
+    @pytest.mark.parametrize("mode", modes)
+    def test_traffic_rate(self, mode):
+        """
+        Unit test for get_traffic_rate()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        traffic_rate = tgn_object.get_traffic_rate()
+        actual_keys = list(traffic_rate.keys())  # Convert dict_keys to a list of keys
+        expected_keys = Traffic_Item
+        if all(key in actual_keys for key in expected_keys):
+            print("Get Traffic Item rate  Successfull")
+        else:
+            pytest.fail("Traffic Item/Items Not Enabled ")
+
+
+    @pytest.mark.second_run
+    @pytest.mark.parametrize("mode", modes)
+    def test_change_traffic_frame_size(self, mode):
+        """
+        Unit test for change_traffic_frame_size
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        packetsize_fixed = {'type':'fixed', 'fixedSize':400}
+        packetsize_auto = {'type':'auto'}
+        packetsize_increment = {'type':'increment', 'incrementStep':2,'incrementFrom':400, 'incrementTo':500}
+        packetsize_imix = {'type':'weightedPairs',
+                           'weightedPairs':['70:7', '590:4', '1518:1']}
+        if mode == 'IXIA':
+            traffic_items = Traffic_Item[2]
+            packet_sizes = [packetsize_fixed, packetsize_auto, packetsize_increment, packetsize_imix]
+        if mode == 'Spirent':
+            traffic_items = ['DR-to-AR-BGP1']
+            packet_sizes = [packetsize_fixed, packetsize_auto, packetsize_increment]
+            log.warning('IMIX option has not been implemented for Spirent yet')
+
+        for packet_size in packet_sizes:
+            tgn_object.change_traffic_frame_size(packet_size, traffic_items)
+            Helper.sleep(10, msg='waiting 10 seconds after type changed to %s' %packet_size['type'])
+            tgn_object.start_traffic(timer_ticks=240)
+            Helper.sleep(30, msg='waiting for stop traffic')
+            tgn_object.stop_traffic(timer_ticks=240)
+
+
+    @pytest.mark.second_run
+    @pytest.mark.parametrize("mode", modes)
+    def test_change_traffic_rate(self, mode):
+        """
+        Unit test for change_traffic_rate()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        traffic_items = None
+        framepersec = {'type':'framesPerSecond', 'rate':200}
+        rateperlinerate = {'type':'percentLineRate', 'rate':0.2}
+        for traffic_rate in [framepersec, rateperlinerate]:
+            tgn_object.change_traffic_rate(traffic_rate, traffic_items)
+            Helper.sleep(10, msg='waiting 10 second after type changed to %s' %
+                         traffic_rate['type'])
+            tgn_object.start_traffic(timer_ticks=240)
+            Helper.sleep(30, msg='waiting for stop traffic')
+            tgn_object.stop_traffic(timer_ticks=240)
