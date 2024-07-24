@@ -24,7 +24,27 @@ apiServerIp = '127.0.0.1'
 tgn_object = IXIA(server_ip=apiServerIp)
 tgn_object.connect_to_session()
 
-port_name = []
+import configparser
+config = configparser.ConfigParser()
+config.read("config.cfg")
+config_file = config.get('testcase', 'config_file')
+apiServerIp = config.get('testcase', 'server_ip')
+port1 = config.get('testcase', 'port1')
+port2 = config.get('testcase', 'port2')
+port3 = config.get('testcase', 'port3')
+port4 = config.get('testcase', 'port4')
+port_name = config.get('port_testcase', 'name')
+state_up = config.get('port_testcase', 'up_state')
+state_down = config.get('port_testcase', 'down_state')
+traffic1 = config.get('transmission_testcase', 'traffic1')
+mtu_port1 = config.get('port_mtu_testcase', 'mtu_port1')
+mtu_port2 = config.get('port_mtu_testcase', 'mtu_port2').split(',')
+mtu_port3 = config.get('port_mtu_testcase', 'mtu_port3')
+mtu_value = config.get('port_mtu_testcase', 'mtu')
+direction1 = config.get('port_mtu_testcase', 'direction1')
+direction2 = config.get('port_mtu_testcase', 'direction2')
+step = config.get('port_mtu_testcase', 'step')
+
 
 
 @pytest.mark.setup
@@ -503,12 +523,161 @@ class TestTGN():
             traffic_items = ['Traffic Item 2']
         elif mode == 'Spirent':
             traffic_items = ['AR-to-DR-BGP1']
-
         tos_single = {'valueType': 'singleValue','singleValue': '0'}
         tos_list = {'valueType': 'valueList', 'valueList': ['0', '1', '3']}
-
         tgn_object = ApData.tgn_objects[mode]
         tgn_object.get_ipv4_tos_information()
         for data in [tos_list, tos_single]:
             tgn_object.change_ipv4_tos(data, traffic_items)
             Helper.sleep(20, msg='waiting 10 seconds for %s' % traffic_items)
+    
+    @pytest.mark.second_run
+    @pytest.mark.parametrize("mode", modes)
+    def test_change_ipv6_traffic_class(self, mode):
+        """
+        Unit test for change_ipv6_traffic_class
+        """
+        if mode == 'IXIA':
+
+            traffic_items = [f'{Traffic_Item[0]}']
+        elif mode == 'Spirent':
+            traffic_items = ['SimpleIPv6']
+        tos_single = {'valueType': 'singleValue','singleValue': '10'}
+        tos_list = {'valueType': 'valueList', 'valueList': ['0', '1', '20']}
+        tgn_object = ApData.tgn_objects[mode]
+        tgn_object.get_ipv6_traffic_class_information()
+        for data in [tos_list, tos_single]:
+            tgn_object.change_ipv6_traffic_class(data, traffic_items)
+            Helper.sleep(10, msg='waiting 10 seconds for %s' % traffic_items)
+
+    @pytest.mark.second_run
+    @pytest.mark.parametrize("mode", modes)
+    def test_get_traffic_transmission_mode(self, mode):
+        """
+        Unit test for get_traffic_transmission_mode()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        if mode == 'IXIA':
+            result = tgn_object.get_traffic_transmission_mode()
+            if result == None:
+                pytest.fail("Error in getting traffic transmission mode, testcase failed ")
+            result = tgn_object.get_traffic_transmission_mode(traffic_item_list=[Traffic_Item[0]])
+            if Traffic_Item[0] not in result.keys():
+                pytest.fail("Error in getting traffic transmission mode, testcase failed ")
+            log.info("Test passed")
+
+
+    @pytest.mark.parametrize("mode", modes)
+    def test_set_port_mtu(self, mode):
+        """
+        Unit test for set_port_mtu
+        """
+        port_mtu = 1800
+        location, interface = '172.29.126.16/5/7', '5/7'
+
+        tgn_object = ApData.tgn_objects[mode]
+        port_name = tgn_object.get_port_name_from_location(location)
+
+        tgn_object.set_port_mtu(interface, port_mtu)
+        mtu = tgn_object.get_port_mtu(location)
+        if mtu != port_mtu:
+            pytest.fail("Expected MTU: %s, Actual MTU with location: %s" %(port_mtu, mtu))
+        mtu = tgn_object.get_port_mtu(port_name)
+        if mtu != port_mtu:
+            pytest.fail("Expected MTU: %s, Actual MTU with port-name: %s" %(port_mtu, mtu))
+
+    
+    @pytest.mark.parametrize("mode", modes)
+    def test_set_port_mtu_test2(self, mode):
+        """
+        Unit test for set_port_mtu()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        if mode == 'IXIA':
+            original_mtu = tgn_object.get_port_mtu(port=mtu_port3)
+            tgn_object.set_port_mtu(port=mtu_port3, mtu = int(mtu_value))
+            mtu = tgn_object.get_port_mtu(port=mtu_port3)
+            if mtu[0] != mtu_value:
+                pytest.fail("Error in setting port mtu, testcase failed")
+            portname = tgn_object.get_port_name_from_location(location=mtu_port3)
+            tgn_object.set_port_mtu(port=portname, mtu = int(mtu_value))
+            mtu1 = tgn_object.get_port_mtu(port=portname)
+            if mtu1[0] != mtu_value:
+                pytest.fail("Error in setting port mtu, testcase failed")
+            tgn_object.set_port_mtu(port=mtu_port2, mtu = int(mtu_value))
+            mtu2 = tgn_object.get_port_mtu(port=mtu_port2)
+            if mtu2[0] != mtu_value:
+                pytest.fail("Error in setting port mtu, testcase failed")
+            tgn_object.set_port_mtu(port=mtu_port2, mtu = int(mtu_value), direction=direction1,step=step)
+            mtu3 = tgn_object.get_port_mtu(port=mtu_port3)
+            if mtu3[0] != mtu_value:
+                pytest.fail("Error in setting port mtu, testcase failed ")
+            tgn_object.set_port_mtu(port=mtu_port2, mtu = int(mtu_value), direction=direction2,step=step)
+            mtu4 = tgn_object.get_port_mtu(port=mtu_port3)
+            if mtu4[0] != mtu_value:
+                pytest.fail("Error in setting port mtu, testcase failed ")
+            tgn_object.set_port_mtu(port=mtu_port3, mtu = int(original_mtu[0]))
+            log.info("Test passed") 
+
+    	
+    @pytest.mark.parametrize("mode", modes)
+    def test_get_port_mtu(self, mode):
+        """
+        Unit test for get_port_mtu()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        if mode == 'IXIA':
+            original_mtu = tgn_object.get_port_mtu(port=mtu_port3)
+            tgn_object.set_port_mtu(port=mtu_port3, mtu = int(mtu_value))
+            portname = tgn_object.get_port_name_from_location(location=mtu_port3)
+            mtu = tgn_object.get_port_mtu(port=portname)
+            if mtu[0] != mtu_value:
+                pytest.fail("Error in getting port mtu, testcase failed ")
+            mtu1 = tgn_object.get_port_mtu(port=mtu_port2)
+            if mtu1[0] != mtu_value:
+                pytest.fail("Error in getting port mtu, testcase failed ")
+            mtu2 = tgn_object.get_port_mtu(port=mtu_port3)
+            if mtu2[0] != mtu_value:
+                pytest.fail("Error in getting port mtu, testcase failed ")
+            tgn_object.set_port_mtu(port=mtu_port3, mtu = int(original_mtu[0]))
+            log.info("Test passed")
+
+
+    @pytest.mark.parametrize("mode", modes)
+    def test_get_port_name_from_location(self, mode):
+        """
+        Unit test for get_port_name_from_location()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        if mode == 'IXIA':
+            portname = tgn_object.get_port_name_from_location(location = port1)
+            if portname == port_name:
+                log.info("Test passed")
+            else:
+                pytest.fail("Error in port name, testcase failed ")
+
+
+    @pytest.mark.parametrize("mode", modes)
+    def test_link_up_down(self, mode):
+        """
+        Unit test for link_up_down()
+        """
+        tgn_object = ApData.tgn_objects[mode]
+        if mode == 'IXIA':
+            state = tgn_object.link_up_down(port= [port1], action=state_down)
+            if state:
+                log.info("Link state is Down")
+            else:
+                pytest.fail("Error in port link, testcase failed ")
+            state = tgn_object.link_up_down(port = [port1])
+            if state:
+                log.info("Link state is up")
+            else:
+                pytest.fail("Error in port link, testcase failed ")
+            portname = tgn_object.get_port_name_from_location(location = port1)
+            state = tgn_object.link_up_down(port = [portname], action=state_up)
+            if state:
+                log.info("Link state is up")
+            else:
+                pytest.fail("Error in port link, testcase failed ")
+            log.info("Testcase Passed")
